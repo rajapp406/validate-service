@@ -1,20 +1,11 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { ValidateService } from './validate.service';
 import { UserResponse } from './interfaces/user.interface';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { LoginRequestDto, LoginResponseDto } from './dto/login.dto';
 
-class FetchUserRequest {
-  @ApiProperty({ 
-    description: 'The ID of the user to fetch',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    required: true
-  })
-  @IsString()
-  @IsNotEmpty()
-  userId: string = '';
-}
+
 
 @ApiTags('Users')
 @Controller('api/v1/users')
@@ -31,18 +22,32 @@ export class ValidateController {
   })
   @ApiResponse({ status: 404, description: 'User not found' })
   async getUser(@Param('id') id: string): Promise<UserResponse> {
-    return this.validateService.fetchUser(id);
+    return this.validateService.fetchUser({email: id, password: 'password'});
   }
 
   @GrpcMethod('ValidateService', 'fetchUser')
   @ApiOperation({ summary: 'Fetch user by userId (gRPC)' })
-  @ApiBody({ type: FetchUserRequest, description: 'User ID in gRPC request format' })
+  @ApiBody({ type: LoginRequestDto, description: 'User credentials' })
   @ApiResponse({ 
     status: 200, 
     description: 'The user has been successfully found via gRPC.',
-    type: UserResponse 
+    type: LoginResponseDto
   })
-  async fetchUser(data: FetchUserRequest): Promise<UserResponse> {
-    return this.validateService.fetchUser(data.userId);
+  async fetchUser(data: LoginRequestDto): Promise<LoginResponseDto> {
+    return this.validateService.fetchUser(data);
+  }
+
+  @GrpcMethod('ValidateService', 'login')
+  @Post('login')
+  @ApiOperation({ summary: 'User login' })
+  @ApiBody({ type: LoginRequestDto })
+  @ApiResponse({
+    status: 201,
+    description: 'User successfully logged in',
+    type: LoginResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async login(@Body() loginRequest: LoginRequestDto): Promise<LoginResponseDto> {
+    return this.validateService.login(loginRequest);
   }
 }

@@ -2,7 +2,7 @@ import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import { join } from 'path';
 
-const PROTO_PATH = join(__dirname, '../../common-modules/protocol/validate.proto');
+const PROTO_PATH = join(__dirname, '../../common-modules/protocol/check.proto');
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true,
@@ -12,10 +12,10 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   oneofs: true,
 });
 
-const validateProto = grpc.loadPackageDefinition(packageDefinition).validate as any;
+const validateProto = grpc.loadPackageDefinition(packageDefinition).check as any;
 
 const client = new validateProto.ValidateService(
-  'localhost:50544',
+  'localhost:50588',
   grpc.credentials.createInsecure(),
 );
 
