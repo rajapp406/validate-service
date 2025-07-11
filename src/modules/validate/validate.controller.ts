@@ -89,6 +89,16 @@ export class ValidateController {
     return this.authService.refreshTokens(payload.sub, refreshToken);
   }
 
+  @GrpcMethod('ValidateService', 'validateToken')
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiBody({ type: RefreshTokenDto })
+  @ApiResponse({ status: 200, description: 'Token successfully refreshed', type: LoginResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
+  async validateToken(@Body() refreshTokenDto: Pick<LoginResponseDto, 'accessToken'>) {
+   console.log(refreshTokenDto, 'refreshTokenDto.accessToken')
+    return await this.authService.validateToken(refreshTokenDto.accessToken);
+  }
+
   @Post('logout')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'User logout' })
