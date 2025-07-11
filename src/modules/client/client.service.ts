@@ -35,7 +35,7 @@ export class ClientService implements OnModuleInit {
     if (!credentials.email || !credentials.password) {
       throw new Error('Both email and password are required');
     }
-    
+    console.log(this.clientService, 'this.clientService', credentials)
     return this.clientService.fetchUser({
       email: credentials.email,
       password: credentials.password

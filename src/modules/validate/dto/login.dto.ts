@@ -58,12 +58,16 @@ export class CreateUserRequestDto {
   @IsNotEmpty()
   lastName: string;
 }
+
 export class LoginResponseDto {
   @ApiProperty({ description: 'User ID' })
   id: string;
 
-  @ApiProperty({ description: 'User name' })
-  name: string;
+  @ApiProperty({ description: 'User first name' })
+  firstName: string;
+
+  @ApiProperty({ description: 'User last name' })
+  lastName: string;
 
   @ApiProperty({ description: 'User email' })
   email: string;
@@ -71,6 +75,19 @@ export class LoginResponseDto {
   @ApiProperty({ description: 'Whether the user is active' })
   isActive: boolean;
 
-  @ApiProperty({ description: 'JWT access token', required: false })
-  accessToken?: string;
+  @ApiProperty({ description: 'JWT access token' })
+  accessToken: string;
+
+  @ApiProperty({ description: 'JWT refresh token' })
+  refreshToken: string;
+}
+
+export class RefreshTokenDto {
+  @ApiProperty({
+    description: 'Refresh token',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+  })
+  @IsString()
+  @IsNotEmpty()
+  refreshToken: string;
 }

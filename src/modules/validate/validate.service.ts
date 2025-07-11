@@ -1,13 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { ClientService } from '../client/client.service';
 import { CreateUserRequestDto, LoginRequestDto, LoginResponseDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
+import { AuthService } from '../auth/auth.service';
+
 const saltRounds = 10;
 
 @Injectable()
 export class ValidateService {
   constructor(
-    private clientService: ClientService
+    private clientService: ClientService,
+    private authService: AuthService,
   ) { }
   async fetchUser(loginRequest: LoginRequestDto): Promise<LoginResponseDto> {
     // For now, we'll just forward to the login method
@@ -16,34 +19,67 @@ export class ValidateService {
   }
 
   async login(loginRequest: LoginRequestDto): Promise<LoginResponseDto> {
-    // TODO: Implement actual authentication logic
-    // For now, return a mock response
-    console.log('login', loginRequest);
-    const hashedPassword = await bcrypt.hash(loginRequest.password, saltRounds);
-    const result = await this.clientService.fetchUser(loginRequest)
-    const comparePassword = await bcrypt.compare(result.password, hashedPassword)
-    console.log('comparePassword', comparePassword);
-    if (!comparePassword) {
-      throw new Error('Invalid password');
+    this.logger.log(`Login attempt for user: ${loginRequest.email}`);
+    
+    // Get user from client service
+    const user = await this.clientService.fetchUser(loginRequest);
+    
+    // Verify user exists and is active
+    if (!user || !user.isActive) {
+      this.logger.warn(`Login failed: User not found or inactive - ${loginRequest.email}`);
+      throw new UnauthorizedException('Invalid credentials');
     }
-    return result;
+    
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(loginRequest.password, user.password);
+    if (!isPasswordValid) {
+      this.logger.warn(`Login failed: Invalid password for user - ${loginRequest.email}`);
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    
+    // Generate tokens
+    const tokens = await this.authService.generateTokens(user.id, user.email);
+    this.logger.log(`Login successful for user: ${user.email}`);
+    console.log(tokens, 'tokens')
+    // Return user data with tokens
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      isActive: user.isActive,
+      ...tokens
+    };
   }
-  async createUser(loginRequest: CreateUserRequestDto): Promise<CreateUserRequestDto> {
-    console.log('createUser', loginRequest);
+  private readonly logger = new Logger(ValidateService.name);
+
+  async createUser(createUserDto: CreateUserRequestDto): Promise<LoginResponseDto> {
+    this.logger.log('Creating new user');
     
     // Hash the password before sending to client service
-    const hashedPassword = await bcrypt.hash(loginRequest.password, saltRounds);
+    const hashedPassword = await bcrypt.hash(createUserDto.password, saltRounds);
     
     const userToCreate = {
-      ...loginRequest,
-      password: hashedPassword
+      ...createUserDto,
+      password: hashedPassword,
+      isActive: true
     };
     
-    const result = await this.clientService.createUser(userToCreate);
-    console.log('createUser', result);
+    // Create user in the database
+    const createdUser = await this.clientService.createUser(userToCreate);
+    this.logger.log(`User created with ID: ${createdUser.id}`);
     
-    // Don't return the hashed password in the response
-    const { password, ...userWithoutPassword } = result;
-    return userWithoutPassword as CreateUserRequestDto;
+    // Generate tokens
+    const tokens = await this.authService.generateTokens(createdUser.id, createdUser.email);
+    
+    // Return user data with tokens
+    return {
+      id: createdUser.id,
+      firstName: createdUser.firstName,
+      lastName: createdUser.lastName,
+      email: createdUser.email,
+      isActive: createdUser.isActive || true,
+      ...tokens
+    };
   }
 }

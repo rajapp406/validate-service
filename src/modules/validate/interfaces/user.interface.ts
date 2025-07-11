@@ -8,10 +8,16 @@ export class UserResponse {
   id: string = '';
 
   @ApiProperty({
-    description: 'Full name of the user',
-    example: 'John Doe'
+    description: 'First name of the user',
+    example: 'John'
   })
-  name: string = '';
+  firstName: string = '';
+
+  @ApiProperty({
+    description: 'Last name of the user',
+    example: 'Doe'
+  })
+  lastName: string = '';
 
   @ApiProperty({
     description: 'Email address of the user',
@@ -24,4 +30,16 @@ export class UserResponse {
     example: true
   })
   isActive: boolean = false;
+
+  @ApiProperty({
+    description: 'JWT access token',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+  })
+  accessToken?: string = '';
+
+  @ApiProperty({
+    description: 'JWT refresh token',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+  })
+  refreshToken?: string = '';
 }
