@@ -41,13 +41,22 @@ export class CreateUserRequestDto {
   password: string;
 
   @ApiProperty({
-    description: 'User name',
-    example: 'John Doe',
+    description: 'User first name',
+    example: 'John',
     required: true,
   })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  firstName: string;
+
+  @ApiProperty({
+    description: 'User last name',
+    example: 'Doe',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  lastName: string;
 }
 export class LoginResponseDto {
   @ApiProperty({ description: 'User ID' })

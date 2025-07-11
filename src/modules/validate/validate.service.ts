@@ -21,7 +21,7 @@ export class ValidateService {
     console.log('login', result);
     return result;
   }
-  async createUser(loginRequest: CreateUserRequestDto): Promise<LoginResponseDto> {
+  async createUser(loginRequest: CreateUserRequestDto): Promise<CreateUserRequestDto> {
     console.log('createUser', loginRequest);
     const result =  await this.clientService.createUser(loginRequest)
     console.log('createUser', result);

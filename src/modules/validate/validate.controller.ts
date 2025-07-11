@@ -39,13 +39,13 @@ export class ValidateController {
 
   @GrpcMethod('ValidateService', 'createUser')
   @ApiOperation({ summary: 'Create user by userId (gRPC)' })
-  @ApiBody({ type: LoginRequestDto, description: 'User credentials' })
+  @ApiBody({ type: CreateUserRequestDto, description: 'User credentials' })
   @ApiResponse({ 
     status: 200, 
     description: 'The user has been successfully created via gRPC.',
-    type: LoginResponseDto
+    type: CreateUserRequestDto
   })
-  async createUser(data: CreateUserRequestDto): Promise<LoginResponseDto> {
+  async createUser(data: CreateUserRequestDto): Promise<CreateUserRequestDto> {
     return this.validateService.createUser(data);
   }
 
@@ -61,5 +61,19 @@ export class ValidateController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async login(@Body() loginRequest: LoginRequestDto): Promise<LoginResponseDto> {
     return this.validateService.login(loginRequest);
+  }
+
+  @GrpcMethod('ValidateService', 'register')
+  @Post('register')
+  @ApiOperation({ summary: 'User register' })
+  @ApiBody({ type: CreateUserRequestDto })
+  @ApiResponse({
+    status: 201,
+    description: 'User successfully logged in',
+    type: CreateUserRequestDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async register(@Body() loginRequest: CreateUserRequestDto): Promise<CreateUserRequestDto> {
+    return this.validateService.createUser(loginRequest);
   }
 }
