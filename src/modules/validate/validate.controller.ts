@@ -3,7 +3,7 @@ import { GrpcMethod } from '@nestjs/microservices';
 import { ValidateService } from './validate.service';
 import { UserResponse } from './interfaces/user.interface';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
-import { LoginRequestDto, LoginResponseDto } from './dto/login.dto';
+import { CreateUserRequestDto, LoginRequestDto, LoginResponseDto } from './dto/login.dto';
 
 
 
@@ -35,6 +35,18 @@ export class ValidateController {
   })
   async fetchUser(data: LoginRequestDto): Promise<LoginResponseDto> {
     return this.validateService.fetchUser(data);
+  }
+
+  @GrpcMethod('ValidateService', 'createUser')
+  @ApiOperation({ summary: 'Create user by userId (gRPC)' })
+  @ApiBody({ type: LoginRequestDto, description: 'User credentials' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'The user has been successfully created via gRPC.',
+    type: LoginResponseDto
+  })
+  async createUser(data: CreateUserRequestDto): Promise<LoginResponseDto> {
+    return this.validateService.createUser(data);
   }
 
   @GrpcMethod('ValidateService', 'login')

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ClientService } from '../client/client.service';
-import { LoginRequestDto, LoginResponseDto } from './dto/login.dto';
+import { CreateUserRequestDto, LoginRequestDto, LoginResponseDto } from './dto/login.dto';
 
 @Injectable()
 export class ValidateService {
@@ -20,5 +20,11 @@ export class ValidateService {
     const result =  await this.clientService.fetchUser(loginRequest)
     console.log('login', result);
     return result;
+  }
+  async createUser(loginRequest: CreateUserRequestDto): Promise<LoginResponseDto> {
+    console.log('createUser', loginRequest);
+    const result =  await this.clientService.createUser(loginRequest)
+    console.log('createUser', result);
+    return result;  
   }
 }
