@@ -80,6 +80,9 @@ export class LoginResponseDto {
 
   @ApiProperty({ description: 'JWT refresh token' })
   refreshToken: string;
+
+  @ApiProperty({ description: 'User profile' })
+  profile?: any;
 }
 
 export class RefreshTokenDto {

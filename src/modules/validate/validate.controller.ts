@@ -38,7 +38,7 @@ export class ValidateController {
     type: LoginResponseDto
   })
   async fetchUser(data: LoginRequestDto): Promise<LoginResponseDto> {
-    return this.validateService.login(data);
+    return await this.validateService.login(data);
   }
 
   @GrpcMethod('ValidateService', 'createUser')

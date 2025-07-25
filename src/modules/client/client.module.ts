@@ -4,6 +4,8 @@ import { join } from 'path';
 import { ClientService } from './client.service';
 import { ClientController } from './client.controller';
 
+const PROTO_DIR = join(process.cwd(), 'node_modules', '@rajapp406', 'proto-definitions', 'protos');
+
 @Module({
   imports: [
     ClientsModule.register([
@@ -12,7 +14,7 @@ import { ClientController } from './client.controller';
         transport: Transport.GRPC,
         options: {
           package: 'client',
-          protoPath: join(__dirname, '../../../../common-modules/protocol/client.proto'),
+          protoPath: join(PROTO_DIR, 'client.proto'),
           url: 'localhost:' + '50522',
         },
       },
@@ -24,6 +26,6 @@ import { ClientController } from './client.controller';
 })
 export class ClientModule {
   constructor() {
-    console.log('ClientModule initialized', join(__dirname, '../../../../common-modules/protocol/client.proto'));
+    console.log('ClientModule initialized with proto directory:', PROTO_DIR);
   }
 }

@@ -4,6 +4,7 @@ import { join } from 'path';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ClientModule } from './modules/client/client.module';
+import { checkProto } from './utils/protos';
 
 async function bootstrap() {
   // Start HTTP app for Swagger and REST endpoints
@@ -41,7 +42,7 @@ async function bootstrap() {
     },
   });
 
-  await httpApp.listen(3600);
+  await httpApp.listen(process.env.HTTP_PORT || 3600);
 
   // Start gRPC microservice
   const grpcApp = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -51,10 +52,7 @@ async function bootstrap() {
       options: {
         url: '0.0.0.0:50588',
         package: 'check',
-        protoPath: join(
-          __dirname,
-          '../../common-modules/protocol/check.proto',
-        ),
+        protoPath: checkProto,
       },
     },
   );

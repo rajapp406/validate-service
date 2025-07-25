@@ -2,8 +2,9 @@ import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import { join } from 'path';
 
-const PROTO_PATH = join(__dirname, '../../common-modules/protocol/validate.proto');
 
+const PROTO_DIR = join(process.cwd(), 'node_modules', '@rajapp406', 'proto-definitions', 'protos');
+const PROTO_PATH = join(PROTO_DIR, 'validate.proto');
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true,
   longs: String,

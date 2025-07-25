@@ -23,7 +23,6 @@ export class ValidateService {
     
     // Get user from client service
     const user = await this.clientService.fetchUser(loginRequest);
-    
     // Verify user exists and is active
     if (!user || !user.isActive) {
       this.logger.warn(`Login failed: User not found or inactive - ${loginRequest.email}`);
@@ -40,7 +39,6 @@ export class ValidateService {
     // Generate tokens
     const tokens = await this.authService.generateTokens(user.id, user.email);
     this.logger.log(`Login successful for user: ${user.email}`);
-    console.log(tokens, 'tokens')
     // Return user data with tokens
     return {
       id: user.id,
@@ -48,6 +46,7 @@ export class ValidateService {
       lastName: user.lastName,
       email: user.email,
       isActive: user.isActive,
+      profile: user.profile,
       ...tokens
     };
   }
