@@ -1,0 +1,47 @@
+services:
+  check-service:
+    container_name: check-service
+    build: .
+    ports:
+      - "3600:3600" # HTTP
+      - "50588:50588" # gRPC
+    env_file:
+      - .env
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CLIENT_SERVICE_URL=client-service:50522
+    networks:
+      - fitness-network
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3600/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - fitness-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+networks:
+  fitness-network:
+    external: true
+    name: fitness-network
+
+volumes:
+  redis-data:

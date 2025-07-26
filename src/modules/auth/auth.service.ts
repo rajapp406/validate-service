@@ -16,9 +16,31 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {
+    const redisHost = this.configService.get<string>('REDIS_HOST');
+    const redisPort = this.configService.get<number>('REDIS_PORT');
+    
+    if (!redisHost) {
+      throw new Error('REDIS_HOST environment variable is not set');
+    }
+    
+    console.log(`Connecting to Redis at ${redisHost}:${redisPort || 6379}`);
+    
     this.redisClient = new Redis({
-      host: this.configService.get('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
+      host: redisHost,
+      port: redisPort || 6379,
+      retryStrategy: (times) => {
+        const delay = Math.min(times * 50, 2000);
+        console.log(`Retrying Redis connection in ${delay}ms`);
+        return delay;
+      },
+    });
+    
+    this.redisClient.on('connect', () => {
+      console.log('Successfully connected to Redis');
+    });
+    
+    this.redisClient.on('error', (err) => {
+      console.error('Redis connection error:', err);
     });
   }
 
