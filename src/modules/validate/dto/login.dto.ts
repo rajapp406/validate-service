@@ -94,3 +94,13 @@ export class RefreshTokenDto {
   @IsNotEmpty()
   refreshToken: string;
 }
+
+export class GoogleAuthDto {
+  @ApiProperty({
+    description: 'Google Auth token',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+  })
+  @IsString()
+  @IsNotEmpty()
+  idToken: string;
+}

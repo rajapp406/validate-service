@@ -3,9 +3,9 @@ import { GrpcMethod } from '@nestjs/microservices';
 import { ValidateService } from './validate.service';
 import { UserResponse } from './interfaces/user.interface';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
-import { CreateUserRequestDto, LoginRequestDto, LoginResponseDto, RefreshTokenDto } from './dto/login.dto';
+import { CreateUserRequestDto, GoogleAuthDto, LoginRequestDto, LoginResponseDto, RefreshTokenDto } from './dto/login.dto';
 import { AuthService } from '../auth/auth.service';
-
+import { GoogleAuthService } from './google-auth.service';
 
 
 @ApiTags('Authentication')
@@ -14,6 +14,7 @@ export class ValidateController {
   constructor(
     private readonly validateService: ValidateService,
     private readonly authService: AuthService,
+    private readonly googleAuthService: GoogleAuthService
   ) {}
 
   @Get(':id')
@@ -39,6 +40,25 @@ export class ValidateController {
   })
   async fetchUser(data: LoginRequestDto): Promise<LoginResponseDto> {
     return await this.validateService.login(data);
+  }
+
+  @GrpcMethod('ValidateService', 'googleOAuth')
+  @ApiOperation({ summary: 'User googleOAuth' })
+  @ApiBody({ type: GoogleAuthDto, description: 'User registration data' })
+  @ApiResponse({ status: 200, description: 'Successfully logged out' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async googleO2Auth(data: GoogleAuthDto) {
+    console.log(data, '------');
+    return await this.googleAuthService.verifyIdToken(data.idToken);
+  }
+
+  @Post('googleAuth')
+  @ApiOperation({ summary: 'User googleAuth' })
+  @ApiBody({ type: GoogleAuthDto, description: 'User registration data' })
+  @ApiResponse({ status: 200, description: 'Successfully logged out' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async googleAuth(@Body() req: GoogleAuthDto) {
+    return await this.googleAuthService.verifyIdToken(req.idToken);
   }
 
   @GrpcMethod('ValidateService', 'createUser')

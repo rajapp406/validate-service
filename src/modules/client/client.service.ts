@@ -10,6 +10,7 @@ interface ClientServiceGrpc {
   Register(data: { email: string; password: string; name: string }): Observable<{ user_id: string; email: string; access_token: string }>;
   Login(data: { email: string; password: string }): Observable<{ user_id: string; email: string; access_token: string }>;
   VerifyToken(data: { token: string }): Observable<{ valid: boolean; user?: any }>;
+  findOrCreateUserByGoogleId(data: { googleId: string; email: string; firstName: string; lastName: string, displayName: string }): Observable<any>;
 }
 
 @Injectable()
@@ -56,6 +57,24 @@ export class ClientService implements OnModuleInit {
       password: credentials.password,
       firstName: credentials.firstName,
       lastName: credentials.lastName
+    }).toPromise() as any;
+  }
+
+  async findOrCreateUserByGoogleId(credentials: { googleId: string; email: string; firstName: string; lastName: string, displayName: string }) {
+    if (!this.clientService) {
+      throw new Error('gRPC service not initialized');
+    }
+    
+    if (!credentials.email || !credentials.googleId) {
+      throw new Error('Both email and googleId are required');
+    }
+    console.log(this.clientService, 'this.clientService')
+    return this.clientService.findOrCreateUserByGoogleId({
+      googleId: credentials.googleId,
+      email: credentials.email,
+      firstName: credentials.firstName,
+      lastName: credentials.lastName,
+      displayName: credentials.displayName,
     }).toPromise() as any;
   }
 }

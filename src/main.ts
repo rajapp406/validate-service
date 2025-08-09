@@ -5,6 +5,7 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ClientModule } from './modules/client/client.module';
 import { checkProto } from './utils/protos';
+import { AuthModule } from './modules/auth/auth.module';
 
 async function bootstrap() {
   // Start HTTP app for Swagger and REST endpoints
@@ -24,8 +25,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(httpApp, config, {
     deepScanRoutes: true,
     include: [
+      AppModule,
       // Add all modules that contain controllers with @ApiTags
       ClientModule,
+      AuthModule,
     ],
   });
   
@@ -45,19 +48,34 @@ async function bootstrap() {
   await httpApp.listen(process.env.HTTP_PORT || 3600);
 
   // Start gRPC microservice
+  const grpcHost = process.env.GRPC_HOST || '0.0.0.0';
+  const grpcPort = process.env.GRPC_PORT || '50588';
+  const grpcUrl = `${grpcHost}:${grpcPort}`;
+  
+  console.log(`Starting gRPC server on ${grpcUrl}`);
+  
   const grpcApp = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
       transport: Transport.GRPC,
       options: {
-        url: '0.0.0.0:50588',
+        url: grpcUrl,
         package: 'check',
         protoPath: checkProto,
+        loader: {
+          keepCase: true,
+          longs: String,
+          enums: String,
+          defaults: true,
+          oneofs: true,
+        },
       },
     },
   );
+  
   await grpcApp.listen();
-  console.log('Validate Service is running on port 50588');
+  console.log(`gRPC server is listening on ${grpcUrl}`);
+  console.log('Check Service is running and ready to accept connections');
 }
 
 bootstrap();

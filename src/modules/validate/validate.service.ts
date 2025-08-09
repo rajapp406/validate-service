@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import { GoogleAuthService } from './google-auth.service';
 import { ClientService } from '../client/client.service';
 import { CreateUserRequestDto, LoginRequestDto, LoginResponseDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
@@ -11,6 +12,7 @@ export class ValidateService {
   constructor(
     private clientService: ClientService,
     private authService: AuthService,
+    private googleAuthService: GoogleAuthService,
   ) { }
   async fetchUser(loginRequest: LoginRequestDto): Promise<LoginResponseDto> {
     // For now, we'll just forward to the login method
@@ -52,6 +54,11 @@ export class ValidateService {
   }
   private readonly logger = new Logger(ValidateService.name);
 
+  async googleAuth({credential}: {credential: string}) {
+    // Verify the Google ID token and extract user info
+    const userInfo = await this.googleAuthService.verifyIdToken(credential);
+    return userInfo;
+  }
   async createUser(createUserDto: CreateUserRequestDto): Promise<LoginResponseDto> {
     this.logger.log('Creating new user');
     
@@ -64,6 +71,7 @@ export class ValidateService {
       isActive: true
     };
     
+    console.log(userToCreate, 'userToCreate');
     // Create user in the database
     const createdUser = await this.clientService.createUser(userToCreate);
     this.logger.log(`User created with ID: ${createdUser.id}`);
